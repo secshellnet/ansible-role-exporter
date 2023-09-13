@@ -1,0 +1,31 @@
+---
+- name: Install pip3
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+    state: present
+
+- name: Install several required python modules
+  ansible.builtin.pip:
+    name: [requests, docker, docker-compose]
+
+- name: Check if cadvisor compose exists
+  ansible.builtin.stat:
+    path: /home/admin/cadvisor/docker-compose.yml
+  register: cadvisor_exists
+
+# TODO @schnitzel remove from monitoring or silence at least
+# - name: Silence Monitoring for ever
+#   when: cadvisor_exists.stat.exists
+
+# docker-compose -f /home/admin/cadvisor/docker-compose.yml down
+- name: Stop and remove cadvisor container
+  community.docker.docker_compose:
+    project_src: /home/admin/cadvisor/
+    state: absent
+  when: cadvisor_exists.stat.exists
+
+- name: Delete cadvisor service directory
+  ansible.builtin.file:
+    path: /home/admin/cadvisor/
+    state: absent

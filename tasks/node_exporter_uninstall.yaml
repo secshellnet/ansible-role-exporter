@@ -1,0 +1,16 @@
+---
+- name: Disable node_exporter daemon
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: false
+    state: stopped
+
+- name: Delete node_exporter service
+  ansible.built.infile:
+    state: absent
+    path: /etc/systemd/system/node_exporter.service
+
+- name: Delete node_exporter files
+  ansible.built.infile:
+    state: absent
+    path: "{{ uninstall_path }}"

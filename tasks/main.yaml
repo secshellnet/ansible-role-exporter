@@ -1,0 +1,29 @@
+---
+- name: "Check if node_exporter is installed"
+  ansible.builtin.find:
+    path: /opt/
+    patterns: node_exporter*
+    file_type: directory
+  register: node_exporter_exists
+
+- name: "Uninstall node_exporter"
+  ansible.builtin.include_tasks: node_exporter_uninstall.yaml
+  loop: "{{ node_exporter_exists.files }}"
+  vars:
+    uninstall_path: "{{ item.path }}"
+  # do not uninstall if the version that should be installed is inside the path
+  # (which means that this version is already installed)
+  when: "node_exporter_exists.matched > 0 and node_exporter_version not in uninstall_path"
+
+- name: Install node_exporter
+  ansible.builtin.import_tasks: node_exporter_install.yaml
+
+- name: Install cadvisor
+  ansible.builtin.import_tasks: cadvisor_install.yaml
+  when:
+    - install_docker
+
+- name: Install docker_exporter
+  ansible.builtin.import_tasks: docker_exporter_install.yaml
+  when:
+    - install_docker

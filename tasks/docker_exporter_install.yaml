@@ -1,0 +1,25 @@
+---
+- name: Create /opt/docker_exporter/
+  ansible.builtin.file:
+    path: /opt/docker_exporter/
+    mode: '755'
+    state: directory
+
+- name: Create docker_exporter.service file
+  ansible.builtin.template:
+    src: docker_exporter.service.j2
+    dest: /etc/systemd/system/docker_exporter.service
+    mode: '644'
+
+- name: Upload docker_status_exporter_amd64
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/docker_status_exporter_amd64"
+    dest: /opt/docker_exporter/docker_status_exporter_amd64
+    mode: '755'
+
+- name: Enables docker_exporter daemon
+  ansible.builtin.systemd:
+    name: docker_exporter
+    daemon_reload: true
+    enabled: true
+    state: started

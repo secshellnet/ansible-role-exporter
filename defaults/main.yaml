@@ -1,0 +1,4 @@
+---
+install_docker: false
+node_exporter_version: 1.6.1
+cadvisor_port: 9080

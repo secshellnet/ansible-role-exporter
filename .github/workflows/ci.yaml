@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+
+      - name: Build docker_status_exporter
+        working-directory: files/docker_status_exporter_src
+        run: go build -ldflags "-w -s"
+
+      - name: Move docker_status_exporter to correct path
+        run: mv files/docker_status_exporter_src/docker_status_exporter files/docker_status_exporter
+
+      - name: Upload docker_status_exporter
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker_status_exporter
+          path: files/docker_status_exporter
+
+      - name: Commit and Push Changes
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+            execSync('git config user.name "GitHub Actions"');
+            execSync('git config user.email "actions@github.com"');
+            execSync('git add files/docker_status_exporter');
+            execSync('git commit -m "Updated docker_status_exporter"');
+            execSync('git push origin main');

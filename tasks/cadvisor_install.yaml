@@ -4,22 +4,27 @@
     name:
       - python3-pip
     state: present
+  become: true
 
-- name: Install several required python modules
+- name: Install required python modules for cadvisor
   ansible.builtin.pip:
-    name: [requests, docker, docker-compose]
+    name:
+      - requests
+      - docker
+      - docker-compose
+  become: true
 
 - name: Create cadvisor service directory
   ansible.builtin.file:
-    path: /home/admin/cadvisor/
+    path: "/home/{{ ansible_user }}/cadvisor/"
     state: directory
-    mode: '0775'
-    owner: root
-    group: admin
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
 
 - name: Check if cadvisor compose already exists
   ansible.builtin.stat:
-    path: /home/admin/cadvisor/docker-compose.yml
+    path: "/home/{{ ansible_user }}/cadvisor/docker-compose.yml"
   register: cadvisor_exists
 
 # TODO can't handle changes... find another solution
@@ -35,28 +40,26 @@
 # TODO check diff between local and remote, if not the same: upload local to remote
 # alternative: give container_name argument and remove container using docker if file has been replaced
 
-# TODO @schnitzel
-# - name: Silence Monitoring for one minute
-#   when: cadvisor_exists.stat.exists and cadvisor_file.changed
-
-# docker-compose -f /home/admin/cadvisor/docker-compose.yml down
 - name: Stop and remove cadvisor container
   community.docker.docker_compose:
-    project_src: /home/admin/cadvisor/
+    project_src: "/home/{{ ansible_user }}/cadvisor/"
     state: absent
-  when: cadvisor_exists.stat.exists and cadvisor_file.changed
+  when:
+    - cadvisor_exists.stat.exists
+    - cadvisor_file.changed
 
 - name: Create cadvisor docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml
-    dest: /home/admin/cadvisor/docker-compose.yml
-    owner: root
-    group: admin
+    dest: "/home/{{ ansible_user }}/cadvisor/docker-compose.yml"
     mode: '0664'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
   register: cadvisor_file_new
 
-# docker-compose -f /home/admin/cadvisor/docker-compose.yml up -d
 - name: Create and start cadvisor container
   community.docker.docker_compose:
-    project_src: /home/admin/cadvisor/
-  when: cadvisor_file and cadvisor_file_new
+    project_src: "/home/{{ ansible_user }}/cadvisor/"
+  when:
+    - cadvisor_file
+    - cadvisor_file_new

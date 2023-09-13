@@ -4,13 +4,16 @@
     name: node_exporter
     enabled: false
     state: stopped
+  become: true
 
 - name: Delete node_exporter service
   ansible.built.infile:
     state: absent
     path: /etc/systemd/system/node_exporter.service
+  become: true
 
 - name: Delete node_exporter files
   ansible.built.infile:
     state: absent
     path: "{{ uninstall_path }}"
+  become: true

@@ -2,7 +2,7 @@
 Description=Docker Exporter
 
 [Service]
-ExecStart=/opt/docker_exporter/docker_status_exporter_amd64 $OPTIONS
+ExecStart=/opt/docker_exporter/docker_status_exporter $OPTIONS
 
 [Install]
 WantedBy=multi-user.target

@@ -1,65 +1,27 @@
 ---
-- name: Install pip3
+- name: "Install python requirements"
   ansible.builtin.apt:
     name:
       - python3-pip
+      - python3-docker
+      - python3-requests
     state: present
   become: true
 
-- name: Install required python modules for cadvisor
-  ansible.builtin.pip:
-    name:
-      - requests
-      - docker
-      - docker-compose
+- name: "Ensure cAdvisor container is running"
+  community.docker.docker_container:
+    name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    restart_policy: unless-stopped
+    privileged: yes
+    devices:
+      - "/dev/kmsg:/dev/kmsg"
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker:/var/lib/docker:ro"
+      - "/cgroup:/cgroup:ro"
+    ports:
+      - "{{ cadvisor_port }}:8080"
   become: true
-
-- name: Create cadvisor service directory
-  ansible.builtin.file:
-    path: "/home/{{ ansible_user }}/cadvisor/"
-    state: directory
-    mode: '0755'
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-
-- name: Check if cadvisor compose already exists
-  ansible.builtin.stat:
-    path: "/home/{{ ansible_user }}/cadvisor/docker-compose.yml"
-  register: cadvisor_exists
-
-# TODO can't handle changes... find another solution
-#- name: Check whether the local file is equal to the remote file
-#  ansible.builtin.template:
-#    src: docker-compose.yml
-#    dest: /home/admin/cadvisor/docker-compose.yml
-#    diff_mode: true
-#    check_mode: true
-#  when: cadvisor_exists.stat.exists
-#  register: cadvisor_file
-
-# TODO check diff between local and remote, if not the same: upload local to remote
-# alternative: give container_name argument and remove container using docker if file has been replaced
-
-- name: Stop and remove cadvisor container
-  community.docker.docker_compose:
-    project_src: "/home/{{ ansible_user }}/cadvisor/"
-    state: absent
-  when:
-    - cadvisor_exists.stat.exists
-    - cadvisor_file.changed
-
-- name: Create cadvisor docker-compose.yml
-  ansible.builtin.template:
-    src: docker-compose.yml
-    dest: "/home/{{ ansible_user }}/cadvisor/docker-compose.yml"
-    mode: '0664'
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-  register: cadvisor_file_new
-
-- name: Create and start cadvisor container
-  community.docker.docker_compose:
-    project_src: "/home/{{ ansible_user }}/cadvisor/"
-  when:
-    - cadvisor_file
-    - cadvisor_file_new

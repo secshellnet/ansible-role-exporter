@@ -1,0 +1,9 @@
+[Unit]
+Description=Redis Exporter
+
+[Service]
+ExecStart=/opt/redis_exporter-v{{ redis_exporter_version }}.linux-amd64/redis_exporter $OPTIONS
+Environment="OPTIONS={{ redis_exporter_options }}"
+
+[Install]
+WantedBy=multi-user.target

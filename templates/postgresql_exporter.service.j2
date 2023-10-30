@@ -1,0 +1,9 @@
+[Unit]
+Description=PostgreSQL Exporter
+
+[Service]
+ExecStart=/opt/postgres_exporter-{{ postgresql_exporter_version }}.linux-amd64/postgres_exporter $OPTIONS
+Environment="OPTIONS={{ postgres_exporter_options }}"
+
+[Install]
+WantedBy=multi-user.target

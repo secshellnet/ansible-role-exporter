@@ -1,0 +1,24 @@
+---
+- name: "Restart node_exporter"
+  ansible.builtin.service:
+    name: node_exporter
+    state: restarted
+  become: yes
+
+- name: "Restart redis_exporter"
+  ansible.builtin.service:
+    name: redis_exporter
+    state: restarted
+  become: yes
+
+- name: "Restart postgresql_exporter"
+  ansible.builtin.service:
+    name: postgresql_exporter
+    state: restarted
+  become: yes
+
+- name: "Restart docker_exporter"
+  ansible.builtin.service:
+    name: docker_exporter
+    state: restarted
+  become: yes

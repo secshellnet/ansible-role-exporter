@@ -14,6 +14,7 @@
     dest: /etc/systemd/system/docker_exporter.service
     mode: '0644'
   become: true
+  notify: "Restart docker_exporter"
 
 - name: Upload docker_status_exporter
   ansible.builtin.copy:
@@ -44,5 +45,8 @@
     state: present
   delegate_to: localhost
   when:
-    - netbox_url
-    - netbox_token
+    - "netbox_url is defined"
+    - "netbox_token is defined"
+    - "netbox_url is not none"
+    - "netbox_token is not none"
+

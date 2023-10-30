@@ -16,14 +16,24 @@
   when: "node_exporter_exists.matched > 0 and node_exporter_version not in uninstall_path"
 
 - name: Install node_exporter
-  ansible.builtin.import_tasks: node_exporter_install.yaml
+  ansible.builtin.include_tasks: node_exporter_install.yaml
 
 - name: Install cadvisor
-  ansible.builtin.import_tasks: cadvisor_install.yaml
+  ansible.builtin.include_tasks: cadvisor_install.yaml
   when:
     - install_docker
 
 - name: Install docker_exporter
-  ansible.builtin.import_tasks: docker_exporter_install.yaml
+  ansible.builtin.include_tasks: docker_exporter_install.yaml
   when:
     - install_docker
+
+- name: Install redis_exporter
+  ansible.builtin.include_tasks: redis_exporter_install.yaml
+  when:
+    - install_redis
+
+- name: Install postgresql_exporter
+  ansible.builtin.include_tasks: postgresql_exporter_install.yaml
+  when:
+    - install_postgresql

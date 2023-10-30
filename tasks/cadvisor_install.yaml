@@ -38,5 +38,8 @@
     state: present
   delegate_to: localhost
   when:
-    - netbox_url
-    - netbox_token
+    - "netbox_url is defined"
+    - "netbox_token is defined"
+    - "netbox_url is not none"
+    - "netbox_token is not none"
+

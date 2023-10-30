@@ -3,6 +3,7 @@ Description=Node Exporter
 
 [Service]
 ExecStart=/opt/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter $OPTIONS
+Environment="OPTIONS={{ node_exporter_options }}"
 
 [Install]
 WantedBy=multi-user.target

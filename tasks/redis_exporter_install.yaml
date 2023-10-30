@@ -1,35 +1,35 @@
 ---
-- name: Downloading and extracting node_exporter
+- name: Downloading and extracting redis_exporter
   ansible.builtin.unarchive:
     remote_src: true
-    src: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+    src: https://github.com/oliver006/redis_exporter/releases/download/v{{ redis_exporter_version }}/redis_exporter-v{{ redis_exporter_version }}.linux-amd64.tar.gz
     dest: /opt/
   become: true
 
-- name: Create node_exporter.service file
+- name: Create redis_exporter.service file
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/node_exporter.service.j2"
-    dest: /etc/systemd/system/node_exporter.service
+    src: "{{ role_path }}/templates/redis_exporter.service.j2"
+    dest: /etc/systemd/system/redis_exporter.service
     mode: '0644'
   become: true
-  notify: "Restart node_exporter"
+  notify: "Restart redis_exporter"
 
-- name: Enables node_exporter daemon
+- name: Enables redis_exporter daemon
   ansible.builtin.systemd:
-    name: node_exporter
+    name: redis_exporter
     daemon_reload: true
     enabled: true
     state: started
   become: true
 
-- name: "Create netbox service for node_exporter"
+- name: "Create netbox service for redis_exporter"
   netbox.netbox.netbox_service:
     netbox_url: "{{ netbox_url }}"
     netbox_token: "{{ netbox_token }}"
     data:
       virtual_machine: "{{ inventory_hostname }}"
-      name: node_exporter
-      port: "9100"
+      name: redis_exporter
+      port: "9121"
       protocol: TCP
     state: present
   delegate_to: localhost
@@ -38,4 +38,3 @@
     - "netbox_token is defined"
     - "netbox_url is not none"
     - "netbox_token is not none"
-

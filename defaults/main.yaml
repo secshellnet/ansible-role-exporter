@@ -1,4 +1,14 @@
 ---
 install_docker: false
+install_redis: false
+install_postgresql: false
+install_nginx: false
+
 node_exporter_version: 1.6.1
+redis_exporter_version: 1.55.0
+postgresql_exporter_version: 0.14.0
 cadvisor_port: 9080
+
+node_exporter_options: "--web.listen-address=:9100"
+redis_exporter_options: "--web.listen-address=:9121"
+postgres_exporter_options: "--web.listen-address=:9187"
